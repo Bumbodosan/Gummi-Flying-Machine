@@ -74,10 +74,8 @@ func (bot *Bot) onMessage(_ *discordgo.Session, message *discordgo.MessageCreate
 
 func (bot *Bot) initCommands() error {
 	bot.Commands = map[string]Command{
-		"ping": PingCommand{},
-		"encode": SubCommand(map[string]Command{
-			"base64": EncodeBase64Command{},
-		}),
+		"ping":   PingCommand{},
+		"encode": EncodeSubCommand(),
 	}
 
 	return nil
