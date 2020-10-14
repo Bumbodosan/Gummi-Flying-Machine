@@ -1,0 +1,9 @@
+version: "3.7"
+services:
+    bot:
+        image: 'golang:latest'
+        env_file: ./.env
+        working_dir: /gfm
+        command: go run .
+        volumes:
+            - .:/gfm

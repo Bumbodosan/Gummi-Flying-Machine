@@ -1,0 +1,7 @@
+version: "3.7"
+services:
+    bot:
+        image: 'bumbodosan/gummi-flying-machine'
+        env_file: ./.env
+        working_dir: /gfm
+        build: .
