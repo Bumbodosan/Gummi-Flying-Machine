@@ -18,10 +18,6 @@ func (c CommandGroup) Run(
 	args string,
 	message *discordgo.Message,
 ) Sendable {
-	if args == "" {
-		return ErrorMessage{Content: "Missing subcommand"}
-	}
-
 	spaceIndex := strings.IndexRune(args, ' ')
 	var commandName, subArgs string
 	if spaceIndex == -1 {
@@ -41,9 +37,16 @@ func (c CommandGroup) Run(
 		oneOf += "\n- " + name
 	}
 
-	return ErrorMessage{Content: fmt.Sprintf(
-		"Unknown subcommand '%s'. Must be one of: %s\n",
-		commandName,
-		oneOf,
-	)}
+	if args == "" {
+		return ErrorMessage{Content: fmt.Sprintf(
+			"Missing subcommand. Must be one of: %s\n",
+			oneOf,
+		)}
+	} else {
+		return ErrorMessage{Content: fmt.Sprintf(
+			"Unknown subcommand '%s'. Must be one of: %s\n",
+			commandName,
+			oneOf,
+		)}
+	}
 }

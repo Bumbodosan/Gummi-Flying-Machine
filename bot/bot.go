@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -80,13 +81,18 @@ func (bot *Bot) onMessage(
 		reply = command.Run(bot, args, message.Message)
 	}
 
-	reply.Send(bot, message.Message)
+	err := reply.Send(bot, message.Message)
+
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func (bot *Bot) initCommands() error {
 	bot.Commands = map[string]Command{
 		"ping":   PingCommand{},
 		"encode": EncodeCommands(),
+		"decode": DecodeCommands(),
 	}
 
 	return nil
