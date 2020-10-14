@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"net/url"
 	"strings"
-	"unicode"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -125,7 +124,7 @@ func (c DecodeCommand) Run(
 
 	isPrintable := true
 	for _, r := range decodedString {
-		if !unicode.IsGraphic(r) {
+		if r < 0x20 && r != '\n' && r != '\t' && r != '\r' {
 			isPrintable = false
 			break
 		}
