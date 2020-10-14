@@ -8,15 +8,6 @@ import (
 
 type PingCommand struct{}
 
-func (c PingCommand) Run(bot *Bot, args string, message *discordgo.Message) error {
-	sentMessage, err := bot.Session.ChannelMessageSend(message.ChannelID, "Pong!")
-
-	if err != nil {
-		return err
-	}
-
-	time.Sleep(3 * time.Second)
-	bot.Session.ChannelMessagesBulkDelete(message.ChannelID, []string{sentMessage.ID, message.ID})
-
-	return nil
+func (c PingCommand) Run(bot *Bot, args string, message *discordgo.Message) Sendable {
+	return Message{Content: "Pong!", Timeout: time.Second * 10}
 }

@@ -4,8 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"net/url"
-	"strings"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -15,8 +13,8 @@ type EncodeCommand struct {
 	name   string
 }
 
-func EncodeSubCommand() SubCommand {
-	return SubCommand(map[string]Command{
+func EncodeCommands() CommandGroup {
+	return CommandGroup(map[string]Command{
 		"base64": EncodeCommand{
 			name: "base64",
 			encode: func(text string) string {
@@ -41,12 +39,6 @@ func EncodeSubCommand() SubCommand {
 				return url.QueryEscape(text)
 			},
 		},
-		"utf8": EncodeCommand{
-			name: "utf8",
-			encode: func(text string) string {
-				return text
-			},
-		},
 	})
 }
 
@@ -54,44 +46,14 @@ func (c EncodeCommand) Run(
 	bot *Bot,
 	args string,
 	message *discordgo.Message,
-) error {
+) Sendable {
 	if args == "" {
-		sentMessage, err := bot.Session.ChannelMessageSend(
-			message.ChannelID,
-			"Got nothing to encode",
-		)
-		if err != nil {
-			return err
-		}
-		time.Sleep(5 * time.Second)
-		bot.Session.ChannelMessagesBulkDelete(message.ChannelID, []string{
-			message.ID,
-			sentMessage.ID,
-		})
-		return nil
+		return ErrorMessage{Content: "Got nothing to encode"}
 	}
 
 	encoded := c.encode(args)
 
-	text := "```\n" +
-		strings.ReplaceAll(args, "```", "`​``") +
-		"```" +
-		c.name +
-		" encoded: ```\n" +
-		encoded +
-		"```"
+	text := "```\n" + encoded + "```"
 
-	_, err := bot.Session.ChannelMessageSend(message.ChannelID, text)
-
-	if err != nil {
-		return err
-	}
-
-	time.Sleep(5 * time.Second)
-	bot.Session.ChannelMessageDelete(
-		message.ChannelID,
-		message.ID,
-	)
-
-	return nil
+	return Message{Content: text}
 }

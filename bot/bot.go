@@ -40,7 +40,9 @@ func (bot *Bot) initDiscord() error {
 	}
 
 	bot.Session.AddHandler(bot.onMessage)
-	bot.Session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuildMessages)
+	bot.Session.Identify.Intents = discordgo.MakeIntent(
+		discordgo.IntentsGuildMessages,
+	)
 
 	if err := bot.Session.Open(); err != nil {
 		return err
@@ -49,7 +51,10 @@ func (bot *Bot) initDiscord() error {
 	return nil
 }
 
-func (bot *Bot) onMessage(_ *discordgo.Session, message *discordgo.MessageCreate) {
+func (bot *Bot) onMessage(
+	_ *discordgo.Session,
+	message *discordgo.MessageCreate,
+) {
 	if message.Author.ID == bot.Session.State.User.ID ||
 		!strings.HasPrefix(message.Content, bot.Prefix) {
 		return
@@ -67,15 +72,21 @@ func (bot *Bot) onMessage(_ *discordgo.Session, message *discordgo.MessageCreate
 		args = rest[spaceIndex+1:]
 	}
 
-	if command := bot.Commands[commandName]; command != nil {
-		command.Run(bot, args, message.Message)
+	command := bot.Commands[commandName];
+	var reply Sendable
+	if command == nil {
+		reply = ErrorMessage{Content: "Unknown command"}
+	} else {
+		reply = command.Run(bot, args, message.Message)
 	}
+
+	reply.Send(bot, message.Message)
 }
 
 func (bot *Bot) initCommands() error {
 	bot.Commands = map[string]Command{
 		"ping":   PingCommand{},
-		"encode": EncodeSubCommand(),
+		"encode": EncodeCommands(),
 	}
 
 	return nil

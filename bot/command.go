@@ -3,34 +3,23 @@ package bot
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 type Command interface {
-	Run(bot *Bot, args string, message *discordgo.Message) error
+	Run(bot *Bot, args string, message *discordgo.Message) Sendable
 }
 
-type SubCommand map[string]Command
+type CommandGroup map[string]Command
 
-func (c SubCommand) Run(bot *Bot, args string, message *discordgo.Message) error {
+func (c CommandGroup) Run(
+	bot *Bot,
+	args string,
+	message *discordgo.Message,
+) Sendable {
 	if args == "" {
-		sentMessage, err := bot.Session.ChannelMessageSend(
-			message.ChannelID,
-			"Missing subcommand.",
-		)
-		if err != nil {
-			return err
-		}
-		time.Sleep(5 * time.Second)
-		bot.Session.ChannelMessagesBulkDelete(
-			message.ChannelID,
-			[]string{
-				message.ID,
-				sentMessage.ID,
-			},
-		)
+		return ErrorMessage{Content: "Missing subcommand"}
 	}
 
 	spaceIndex := strings.IndexRune(args, ' ')
@@ -52,28 +41,9 @@ func (c SubCommand) Run(bot *Bot, args string, message *discordgo.Message) error
 		oneOf += "\n- " + name
 	}
 
-	sentMessage, err := bot.Session.ChannelMessageSend(
-		message.ChannelID,
-		fmt.Sprintf(
-			"Unknown subcommand '%s'. Must be one of: %s\n",
-			commandName,
-			oneOf,
-		),
-	)
-
-	if err != nil {
-		return err
-	}
-
-	time.Sleep(1 * time.Minute)
-
-	bot.Session.ChannelMessagesBulkDelete(
-		message.ChannelID,
-		[]string{
-			message.ID,
-			sentMessage.ID,
-		},
-	)
-
-	return nil
+	return ErrorMessage{Content: fmt.Sprintf(
+		"Unknown subcommand '%s'. Must be one of: %s\n",
+		commandName,
+		oneOf,
+	)}
 }
