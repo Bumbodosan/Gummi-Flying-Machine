@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -15,18 +14,16 @@ import (
 func main() {
 	b := &bot.Bot{}
 
-	godotenv.Load();
+	godotenv.Load()
 
-	flag.StringVar(&b.Token, "token", os.Getenv("TOKEN"), "Discord Bot Token")
-	flag.StringVar(&b.Prefix, "prefix", os.Getenv("PREFIX"), "Command prefix")
-	flag.Parse()
-	if b.Token == "" {
-		fmt.Println("Missing token")
+	if os.Getenv("TOKEN") == "" {
+		fmt.Println("Missing token.")
 		os.Exit(-1)
 	}
+	b.Token = os.Getenv("TOKEN")
+	b.Prefix = os.Getenv("PREFIX")
 	if b.Prefix == "" {
-		fmt.Println("Missing prefix")
-		os.Exit(-1)
+		b.Prefix = "!"
 	}
 
 	if err := b.Start(); err != nil {
@@ -34,12 +31,12 @@ func main() {
 		os.Exit(-1)
 	}
 
-	fmt.Println("Gummi Flying Machine running")
+	fmt.Println("Gummi Flying Machine is in the skies! 🛩️")
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 
-	fmt.Println(<-ch, "received, quitting...")
+	fmt.Println(<-ch, "Exiting...")
 
 	if err := b.Stop(); err != nil {
 		fmt.Println(err)
