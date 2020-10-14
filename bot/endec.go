@@ -124,7 +124,7 @@ func (c DecodeCommand) Run(
 
 	isPrintable := true
 	for _, r := range decodedString {
-		if r < 0x20 && r != '\n' && r != '\t' && r != '\r' {
+		if r < 0x20 && r != '\n' && r != '\t' && r != '\r' || r == 0x7f {
 			isPrintable = false
 			break
 		}
