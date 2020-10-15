@@ -49,6 +49,11 @@ func (bot *Bot) initDiscord() error {
 		return err
 	}
 
+	bot.Session.UpdateStatus(0, "")
+	if err := bot.Session.UpdateListeningStatus("🛩️"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
