@@ -34,47 +34,42 @@ type ErrorMessage struct {
 }
 
 func (msg Message) Send(bot *Bot, replyingTo *discordgo.Message) error {
-	var msgsSent []*discordgo.Message
-	if msg.Embed != nil {
-		ms, err := bot.Session.ChannelMessageSendEmbed(replyingTo.ChannelID, msg.Embed)
-		if err != nil {
-			return err
+	files := make([]*discordgo.File, len(msg.Files))
+	for i, file := range msg.Files {
+		files[i] = &discordgo.File{
+			Name:   file.Name,
+			Reader: file.Reader,
 		}
-		msgsSent = append(msgsSent, ms)
 	}
 
-	if msg.Files != nil {
-		for _, file := range msg.Files {
-			ms, err := bot.Session.ChannelMessageSendComplex(
-				replyingTo.ChannelID,
-				&discordgo.MessageSend{
-					Files: []*discordgo.File{
-						{
-							Name:   file.Name,
-							Reader: file.Reader,
-						},
-					},
-				},
-			)
-			if err != nil {
-				return err
-			}
-			msgsSent = append(msgsSent, ms)
-		}
+	// Only send plain context when we have no embed
+	var content string
+	if msg.Embed == nil {
+		content = msg.Content
+	}
+
+	msgSent, err := bot.Session.ChannelMessageSendComplex(
+		replyingTo.ChannelID,
+		&discordgo.MessageSend{
+			Content: content,
+			Files:   files,
+			Embed:   msg.Embed,
+		},
+	)
+	if err != nil {
+		return err
 	}
 
 	if msg.Timeout != 0 {
 		time.Sleep(msg.Timeout)
 
-		for _, msgSent := range msgsSent {
-			err := bot.Session.ChannelMessagesBulkDelete(
-				replyingTo.ChannelID,
-				[]string{replyingTo.ID, msgSent.ID},
-			)
+		err := bot.Session.ChannelMessagesBulkDelete(
+			replyingTo.ChannelID,
+			[]string{replyingTo.ID, msgSent.ID},
+		)
 
-			if err != nil {
-				return err
-			}
+		if err != nil {
+			return err
 		}
 	}
 
