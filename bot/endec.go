@@ -148,12 +148,35 @@ func (c DecodeCommand) Run(
 		}
 	}
 
-	if isPrintable {
-		return Message{Content: "```\n" + string(decoded) + "```"}
-	} else {
-		return Message{Files: []File{{
-			Name:   "decoded",
-			Reader: strings.NewReader(decodedString),
-		}}}
+	msg := Message{
+		Content: decodedString,
 	}
+
+	if isPrintable {
+		msg.Embed = &discordgo.MessageEmbed{
+			Title: "Decoded from `" + c.name + "`",
+			Fields: []*discordgo.MessageEmbedField{
+				{
+					Name:  "Input",
+					Value: "```" + args + "```",
+				},
+				{
+					Name:  "Output",
+					Value: "```" + decodedString + "```",
+				},
+			},
+			Footer: &discordgo.MessageEmbedFooter{
+				IconURL: message.Author.AvatarURL("1024"),
+				Text:    "Requested by " + message.Author.Username,
+			},
+		}
+	} else {
+		msg.Files = []File{
+			{
+				Name:   "decoded",
+				Reader: strings.NewReader(decodedString),
+			},
+		}
+	}
+	return msg
 }
