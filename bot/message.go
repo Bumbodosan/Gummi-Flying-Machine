@@ -12,12 +12,14 @@ type Sendable interface {
 }
 
 type Message struct {
-	Content string
-	Files   []File
+	Content         string                            `json:"content,omitempty"`
+	Embed           *discordgo.MessageEmbed           `json:"embed,omitempty"`
+	TTS             bool                              `json:"tts"`
+	Files           []File                            `json:"-"`
+	AllowedMentions *discordgo.MessageAllowedMentions `json:"allowed_mentions,omitempty"`
+
 	Timeout time.Duration // zero for don't remove
 	// maybe different timeout for message being replied to
-
-	// Add more things from discordgo.MessageSend here when needed
 }
 
 type File struct {
@@ -33,8 +35,8 @@ type ErrorMessage struct {
 
 func (msg Message) Send(bot *Bot, replyingTo *discordgo.Message) error {
 	var msgsSent []*discordgo.Message
-	if msg.Content != "" {
-		ms, err := bot.Session.ChannelMessageSend(replyingTo.ChannelID, msg.Content)
+	if msg.Embed != nil {
+		ms, err := bot.Session.ChannelMessageSendEmbed(replyingTo.ChannelID, msg.Embed)
 		if err != nil {
 			return err
 		}

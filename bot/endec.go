@@ -89,6 +89,7 @@ func DecodeCommands() CommandGroup {
 	}
 }
 
+// Run : Runs the command,
 func (c EncodeCommand) Run(
 	bot *Bot,
 	args string,
@@ -100,9 +101,26 @@ func (c EncodeCommand) Run(
 
 	encoded := c.encode(args)
 
-	text := "```\n" + encoded + "```"
-
-	return Message{Content: text}
+	return Message{
+		Content: encoded,
+		Embed: &discordgo.MessageEmbed{
+			Title: "Encoded to `" + c.name + "`",
+			Fields: []*discordgo.MessageEmbedField{
+				{
+					Name:  "Input",
+					Value: "`" + args + "`",
+				},
+				{
+					Name:  "Output",
+					Value: "`" + encoded + "`",
+				},
+			},
+			Footer: &discordgo.MessageEmbedFooter{
+				IconURL: message.Author.AvatarURL("1024"),
+				Text:    "Requested by " + message.Author.Username,
+			},
+		},
+	}
 }
 
 func (c DecodeCommand) Run(
@@ -134,7 +152,7 @@ func (c DecodeCommand) Run(
 		return Message{Content: "```\n" + string(decoded) + "```"}
 	} else {
 		return Message{Files: []File{{
-			Name: "decoded",
+			Name:   "decoded",
 			Reader: strings.NewReader(decodedString),
 		}}}
 	}

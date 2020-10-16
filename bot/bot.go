@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// Bot struct
 type Bot struct {
 	Session *discordgo.Session
 	// DB *gorm.DB
@@ -17,6 +18,7 @@ type Bot struct {
 	Commands map[string]Command
 }
 
+// Start the bot
 func (bot *Bot) Start() error {
 	if err := bot.initDiscord(); err != nil {
 		return err
@@ -29,6 +31,7 @@ func (bot *Bot) Start() error {
 	return nil
 }
 
+// Stop the bot
 func (bot *Bot) Stop() error {
 	return bot.Session.Close()
 }
@@ -49,8 +52,7 @@ func (bot *Bot) initDiscord() error {
 		return err
 	}
 
-	bot.Session.UpdateStatus(0, "")
-	if err := bot.Session.UpdateListeningStatus("🛩️"); err != nil {
+	if err := bot.Session.UpdateStatus(0, "in the skies!"); err != nil {
 		return err
 	}
 
@@ -78,7 +80,7 @@ func (bot *Bot) onMessage(
 		args = rest[spaceIndex+1:]
 	}
 
-	command := bot.Commands[commandName];
+	command := bot.Commands[commandName]
 	var reply Sendable
 	if command == nil {
 		reply = ErrorMessage{Content: "Unknown command"}
