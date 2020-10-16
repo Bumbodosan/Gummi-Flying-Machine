@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"io"
 	"time"
 
@@ -60,9 +61,23 @@ func (msg Message) Send(bot *Bot, replyingTo *discordgo.Message) error {
 		return err
 	}
 
-	if msg.Timeout != 0 {
-		time.Sleep(msg.Timeout)
+	go func() {
+		time.Sleep(5 * time.Second)
+		err = bot.Session.ChannelMessageDelete(
+			replyingTo.ChannelID,
+			replyingTo.ID,
+		)
 
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	if msg.Timeout == 0 {
+		msg.Timeout = time.Second * 10
+	}
+	if msg.Timeout > 0 {
+		time.Sleep(msg.Timeout)
 		err := bot.Session.ChannelMessagesBulkDelete(
 			replyingTo.ChannelID,
 			[]string{replyingTo.ID, msgSent.ID},
