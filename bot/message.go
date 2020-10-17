@@ -30,7 +30,7 @@ type File struct {
 
 type ErrorMessage struct {
 	Content string
-
+	Embed   *discordgo.MessageEmbed
 	// Add more things from discordgo.MessageSend here when needed
 }
 
@@ -92,7 +92,8 @@ func (msg Message) Send(bot *Bot, replyingTo *discordgo.Message) error {
 }
 
 func (msg ErrorMessage) Send(bot *Bot, replyingTo *discordgo.Message) error {
-	msgSent, err := bot.Session.ChannelMessageSend(replyingTo.ChannelID, msg.Content)
+	msg.Embed.Color = 15158332
+	msgSent, err := bot.Session.ChannelMessageSendEmbed(replyingTo.ChannelID, msg.Embed)
 
 	if err != nil {
 		return err

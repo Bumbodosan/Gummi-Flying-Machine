@@ -37,16 +37,17 @@ func (c CommandGroup) Run(
 		oneOf += "\n- " + name
 	}
 
-	if args == "" {
-		return ErrorMessage{Content: fmt.Sprintf(
-			"Missing subcommand. Must be one of: %s\n",
+	embed := discordgo.MessageEmbed{
+		Description: fmt.Sprintf(
+			"Must be one of: %s\n",
 			oneOf,
-		)}
-	} else {
-		return ErrorMessage{Content: fmt.Sprintf(
-			"Unknown subcommand '%s'. Must be one of: %s\n",
-			commandName,
-			oneOf,
-		)}
+		),
 	}
+
+	if args == "" {
+		embed.Title = "Missing subcommand"
+	} else {
+		embed.Title = fmt.Sprintf("Unknown subcommand: `%s`", commandName)
+	}
+	return ErrorMessage{Embed: &embed}
 }
