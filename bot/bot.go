@@ -83,7 +83,7 @@ func (bot *Bot) onMessage(
 	command := bot.Commands[commandName]
 	var reply Sendable
 	if command == nil {
-		reply = ErrorMessage{Content: "Unknown command"}
+		reply = ErrorMessage{Title: "Unknown command"}
 	} else {
 		reply = command.Run(bot, args, message.Message)
 	}

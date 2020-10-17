@@ -19,7 +19,7 @@ type Message struct {
 	Files           []File                            `json:"-"`
 	AllowedMentions *discordgo.MessageAllowedMentions `json:"allowed_mentions,omitempty"`
 
-	Timeout time.Duration // zero for don't remove
+	Timeout time.Duration // zero for default, negative for don't remove
 	// maybe different timeout for message being replied to
 }
 
@@ -29,9 +29,9 @@ type File struct {
 }
 
 type ErrorMessage struct {
-	Content string
-	Embed   *discordgo.MessageEmbed
-	// Add more things from discordgo.MessageSend here when needed
+	Title       string
+	Description string
+	// Add more things from discordgo.MessageEmbed here when needed
 }
 
 func (msg Message) Send(bot *Bot, replyingTo *discordgo.Message) error {
@@ -92,8 +92,11 @@ func (msg Message) Send(bot *Bot, replyingTo *discordgo.Message) error {
 }
 
 func (msg ErrorMessage) Send(bot *Bot, replyingTo *discordgo.Message) error {
-	msg.Embed.Color = 15158332
-	msgSent, err := bot.Session.ChannelMessageSendEmbed(replyingTo.ChannelID, msg.Embed)
+	msgSent, err := bot.Session.ChannelMessageSendEmbed(replyingTo.ChannelID, &discordgo.MessageEmbed{
+		Color: 0xe74c3c,
+		Title: msg.Title,
+		Description: msg.Description,
+	})
 
 	if err != nil {
 		return err

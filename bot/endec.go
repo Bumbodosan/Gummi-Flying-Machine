@@ -96,7 +96,7 @@ func (c EncodeCommand) Run(
 	message *discordgo.Message,
 ) Sendable {
 	if args == "" {
-		return ErrorMessage{Content: "Got nothing to encode"}
+		return ErrorMessage{Title: "Got nothing to encode"}
 	}
 
 	encoded := c.encode(args)
@@ -129,13 +129,13 @@ func (c DecodeCommand) Run(
 	message *discordgo.Message,
 ) Sendable {
 	if args == "" {
-		return ErrorMessage{Content: "Got nothing to decode"}
+		return ErrorMessage{Title: "Got nothing to decode"}
 	}
 
 	decoded, err := c.decode(args)
 
 	if err != nil {
-		return ErrorMessage{Content: err.Error()}
+		return ErrorMessage{Title: "Decoding error", Description: err.Error()}
 	}
 
 	decodedString := string(decoded)
@@ -150,6 +150,7 @@ func (c DecodeCommand) Run(
 
 	msg := Message{
 		Content: decodedString,
+		Timeout: -1,
 	}
 
 	if isPrintable {
